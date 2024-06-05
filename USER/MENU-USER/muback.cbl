@@ -9,8 +9,8 @@
       ******************************************************************
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01  SC-MENU-RETURN PIC X(01).
-       01  VALID-CHOICE PIC X(01) VALUE 'O'.
+       01  SC-MENU-RETURN       PIC X(01).
+       01  VALID-CHOICE         PIC X(01) VALUE 'O'.
 
       ******************************************************************
        PROCEDURE DIVISION.
@@ -18,9 +18,9 @@
       ******************************************************************
        0000-START-VALIDATE-CHOICE.
       *---------------------------------------------------------------
-      * This paragraph orchestrates the validation process by 
-      * performing the necessary steps: displaying the message,
-      * accepting and validating the input, and ending the process.
+      * Ce paragraphe orchestre le processus de validation en
+      * exécutant les étapes nécessaires : afficher le message,
+      * accepter et valider l'entrée, et terminer le processus.
       *---------------------------------------------------------------
            PERFORM 1000-DISPLAY-VALIDATION-MESSAGE.
            PERFORM 2000-ACCEPT-AND-VALIDATE.
@@ -30,8 +30,9 @@
       ******************************************************************
        1000-DISPLAY-VALIDATION-MESSAGE.
       *---------------------------------------------------------------
-      * This paragraph displays a message to the user, instructing 
-      * them to press "O" followed by Enter to validate their choice.
+      * Ce paragraphe affiche un message à l'utilisateur, l'invitant
+      * à appuyer sur "O" suivi de la touche Entrée pour valider son 
+      * choix.
       *---------------------------------------------------------------
            DISPLAY "Appuyez sur O puis Entree pour valider".
            EXIT.
@@ -39,10 +40,11 @@
       ******************************************************************
        2000-ACCEPT-AND-VALIDATE.
       *---------------------------------------------------------------
-      * This paragraph accepts the user input and converts it to 
-      * uppercase. It then checks if the input matches the valid 
-      * choice ("O"). If not, it displays an error message and 
-      * recursively re-invokes itself until a valid input is provided.
+      * Ce paragraphe accepte l'entrée de l'utilisateur et la convertit
+      * en majuscules. Ensuite, il vérifie si l'entrée correspond au
+      * choix valide ("O"). Si ce n'est pas le cas, il affiche un 
+      * message d'erreur et se ré-invoque récursivement jusqu'à ce 
+      * qu'une entrée valide soit fournie.
       *---------------------------------------------------------------
            ACCEPT SC-MENU-RETURN.
            MOVE FUNCTION UPPER-CASE(SC-MENU-RETURN) TO SC-MENU-RETURN.
@@ -55,8 +57,8 @@
       ******************************************************************
        9000-END-VALIDATE-CHOICE.
       *---------------------------------------------------------------
-      * This paragraph displays a confirmation message indicating 
-      * that a valid choice has been made.
+      * Ce paragraphe affiche un message de confirmation indiquant
+      * qu'un choix valide a été fait.
       *---------------------------------------------------------------
            DISPLAY "Choix valide.".
            EXIT.
