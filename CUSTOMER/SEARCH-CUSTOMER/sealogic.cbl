@@ -2,8 +2,10 @@
       *    Le programme 'search logic' recherche dans la table         *
       *    'customer' un ou plusieurs adhérent en fonction des saisies *
       *    de l'utilisateur dans les différents champs de recherche.   *
-      *    Les saisies de l'utilisateur correspondent soit au code_secu*
-      *    soit au nom, prénom et date de naissance.                   *
+      *    Les saisies de l'utilisateur correspondent à :              *
+      *    - soit au code_secu.                                        *
+      *    - soit au nom, prénom et date de naissance.                 *
+      *    - soit au code_secu, nom, prénom et date de naissance.      *
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. sealogic.
@@ -13,31 +15,6 @@
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
-       01  CUSTOMER-TABLE.
-           03 CUS-CNT PIC 9(10).
-           03 CUSTOMER OCCURS 1000 TIMES 
-                       INDEXED BY CUS-IDX.
-               05 CUS-GENDER      PIC X(10).
-               05 CUS-LASTNAME	  PIC X(50).
-               05 CUS-FIRSTNAME   PIC X(50).
-               05 CUS-ADRESS1	  PIC X(50).
-               05 CUS-ADRESS2	  PIC X(50).
-               05 CUS-ZIPCODE	  PIC X(15).
-               05 CUS-TOWN	      PIC X(50).
-               05 CUS-COUNTRY	  PIC X(20).
-               05 CUS-PHONE	      PIC X(10).
-               05 CUS-MAIL	      PIC X(50).
-               05 CUS-BIRTH-DATE  PIC X(10).
-               05 CUS-DOCTOR	  PIC X(50).
-               05 CUS-CODE-SECU   PIC 9(10).
-               05 CUS-CODE-IBAN   PIC X(34).
-               05 CUS-NBCHILDREN  PIC 9(03).
-               05 CUS-COUPLE      PIC X(05).
-               05 CUS-CREATE-DATE PIC X(10).
-               05 CUS-UPDATE-DATE PIC X(10).
-               05 CUS-CLOSE-DATE  PIC X(10).
-               05 CUS-ACTIVE	  PIC X(01).
-
        01  WS-CUSTOMER-ACCEPT.
            03 WS-CUS-CODE-SECU  PIC 9(15).
            03 WS-CUS-LASTNAME   PIC X(50).
@@ -50,6 +27,7 @@
        01  PASSWD   PIC  X(10) VALUE 'cbl85'.
 
        01  SQL-CUSTOMER.
+           03 SQL-CUS-UUID        PIC X(36).
            03 SQL-CUS-GENDER      PIC X(10).
            03 SQL-CUS-LASTNAME    PIC X(50).
            03 SQL-CUS-FIRSTNAME   PIC X(50).
@@ -74,15 +52,18 @@
        EXEC SQL INCLUDE SQLCA END-EXEC.  
 
        LINKAGE SECTION.
+       01  LK-REQUEST-CODE      PIC 9(01).
+
        01  LK-CUSTOMER-ACCEPT.
            03 LK-CUS-CODE-SECU  PIC 9(15).
            03 LK-CUS-LASTNAME   PIC X(50).
            03 LK-CUS-FIRSTNAME  PIC X(50).
            03 LK-CUS-BIRTH-DATE PIC X(10).
+       
       
       ******************************************************************
 
-       PROCEDURE DIVISION USING LK-CUSTOMER-ACCEPT.
+       PROCEDURE DIVISION USING LK-REQUEST-CODE, LK-CUSTOMER-ACCEPT.
        0000-START-MAIN.
            EXEC SQL
                CONNECT :USERNAME IDENTIFIED BY :PASSWD USING :DBNAME 
@@ -102,40 +83,74 @@
 
       ******************************************************************
       *    [RD] Requêtes SQL qui retourne un ou plusieurs adhérents    * 
-      *    en fonction de la recherche effectuée par l'utilisateur.    *
+      *    qui ne sont pas archiver en fonction de la recherche        *
+      *    effectuée par l'utilisateur.                                *
       ******************************************************************
        1000-START-SQL-REQUEST.
       *    Recherche en fonction du code_secu
            EXEC SQL
                DECLARE CRSCODESECU CURSOR FOR
-               SELECT customer_lastname, customer_firstname,
+               SELECT uuid_customer, customer_gender,
+               customer_lastname, customer_firstname,
                customer_birth_date, customer_code_secu
                FROM customer
                WHERE customer_code_secu = :WS-CUS-CODE-SECU
+               AND customer_active != 'A'
            END-EXEC.
 
       *    Recherche en fonction du lastname, firstname et birth_date
            EXEC SQL
                DECLARE CRSNAMEDATE CURSOR FOR
-               SELECT customer_lastname, customer_firstname,
+               SELECT uuid_customer, customer_gender, 
+               customer_lastname, customer_firstname,
                customer_birth_date, customer_code_secu
                FROM customer
                WHERE customer_lastname = TRIM(:WS-CUS-LASTNAME)
                AND customer_firstname = TRIM(:WS-CUS-FIRSTNAME)
                AND customer_birth_date = :WS-CUS-BIRTH-DATE
+               AND customer_active != 'A'
+           END-EXEC.
+
+      *    Recherche en fonction du code_secu, lastname, firstname 
+      *    et birth_date
+           EXEC SQL
+               DECLARE CRSALL CURSOR FOR
+               SELECT uuid_customer, customer_gender, 
+               customer_lastname, customer_firstname, customer_adress1,
+               customer_adress2, customer_zipcode, customer_town,
+               customer_country, customer_phone, customer_mail,
+               customer_birth_date, customer_doctor, customer_code_secu,
+               customer_code_iban, customer_nbchildren, customer_couple,
+               customer_create_date, customer_update_date,
+               customer_close_date, customer_active
+               FROM customer
+               WHERE customer_code_secu = :WS-CUS-CODE-SECU
+               AND customer_lastname = TRIM(:WS-CUS-LASTNAME)
+               AND customer_firstname = TRIM(:WS-CUS-FIRSTNAME)
+               AND customer_birth_date = :WS-CUS-BIRTH-DATE
+               AND customer_active != 'A'
            END-EXEC.
        END-1000-SQL-REQUEST.
            EXIT.
 
       ******************************************************************
-      *    [RD] Appel les 2 paragraphes qui s'occupent de FETCH.       *
+      *    [RD] Appel le paragraphe qui s'occupe de FETCH en fonction  *
+      *    du numéro de LK-REQUEST-CODE.                               *
       ******************************************************************
        2000-START-FETCH-CURSOR.
-           PERFORM 2100-START-FETCH-CRSCODESECU
-              THRU END-2100-FETCH-CRSCODESECU.
-
-           PERFORM 2200-START-FETCH-CRSNAMEDATE
-              THRU END-2200-FETCH-CRSNAMEDATE.
+           EVALUATE LK-REQUEST-CODE
+               WHEN 1
+                   PERFORM 2100-START-FETCH-CRSCODESECU
+                      THRU END-2100-FETCH-CRSCODESECU
+               WHEN 2
+                   PERFORM 2200-START-FETCH-CRSNAMEDATE
+                      THRU END-2200-FETCH-CRSNAMEDATE
+               WHEN 3
+                   PERFORM 2300-START-FETCH-CRSALL
+                      THRU END-2300-FETCH-CRSALL
+               WHEN OTHER
+                  CONTINUE
+           END-EVALUATE.
        END-2000-FETCH-CURSOR.
            EXIT.
 
@@ -150,13 +165,22 @@
            PERFORM UNTIL SQLCODE = 100
                EXEC SQL
                    FETCH CRSCODESECU
-                   INTO :SQL-CUS-LASTNAME, :SQL-CUS-FIRSTNAME,
-                        :SQL-CUS-BIRTH-DATE, :SQL-CUS-CODE-SECU
+                   INTO :SQL-CUS-UUID, :SQL-CUS-GENDER,
+                        :SQL-CUS-LASTNAME, :SQL-CUS-FIRSTNAME,
+                        :SQL-CUS-ADRESS1, :SQL-CUS-ADRESS2, 
+                        :SQL-CUS-ZIPCODE, :SQL-CUS-TOWN,
+                        :SQL-CUS-COUNTRY, :SQL-CUS-PHONE,
+                        :SQL-CUS-MAIL, :SQL-CUS-BIRTH-DATE, 
+                        :SQL-CUS-DOCTOR, :SQL-CUS-CODE-SECU, 
+                        :SQL-CUS-CODE-IBAN, :SQL-CUS-NBCHILDREN, 
+                        :SQL-CUS-COUPLE, :SQL-CUS-CREATE-DATE, 
+                        :SQL-CUS-UPDATE-DATE, :SQL-CUS-CLOSE-DATE, 
+                        :SQL-CUS-ACTIVE
                END-EXEC
 
                EVALUATE SQLCODE
                    WHEN ZERO
-                       PERFORM 3000-START-HANDLE THRU END-3000-HANDLE
+      *                PERFORM 3000-START-HANDLE THRU END-3000-HANDLE
                    WHEN 100
                        DISPLAY 'NO MORE ROWS IN CURSOR RESULT SET'
                    WHEN OTHER
@@ -182,13 +206,22 @@
            PERFORM UNTIL SQLCODE = 100
                EXEC SQL
                    FETCH CRSNAMEDATE
-                   INTO :SQL-CUS-LASTNAME, :SQL-CUS-FIRSTNAME,
-                        :SQL-CUS-BIRTH-DATE, :SQL-CUS-CODE-SECU
+                   INTO :SQL-CUS-UUID, :SQL-CUS-GENDER,
+                        :SQL-CUS-LASTNAME, :SQL-CUS-FIRSTNAME,
+                        :SQL-CUS-ADRESS1, :SQL-CUS-ADRESS2, 
+                        :SQL-CUS-ZIPCODE, :SQL-CUS-TOWN,
+                        :SQL-CUS-COUNTRY, :SQL-CUS-PHONE,
+                        :SQL-CUS-MAIL, :SQL-CUS-BIRTH-DATE, 
+                        :SQL-CUS-DOCTOR, :SQL-CUS-CODE-SECU, 
+                        :SQL-CUS-CODE-IBAN, :SQL-CUS-NBCHILDREN, 
+                        :SQL-CUS-COUPLE, :SQL-CUS-CREATE-DATE, 
+                        :SQL-CUS-UPDATE-DATE, :SQL-CUS-CLOSE-DATE, 
+                        :SQL-CUS-ACTIVE
                END-EXEC
 
                EVALUATE SQLCODE
                    WHEN ZERO
-                       PERFORM 3000-START-HANDLE THRU END-3000-HANDLE
+      *                PERFORM 3000-START-HANDLE THRU END-3000-HANDLE
                    WHEN 100
                        DISPLAY 'NO MORE ROWS IN CURSOR RESULT SET'
                    WHEN OTHER
@@ -204,15 +237,42 @@
            EXIT.
 
       ******************************************************************
-      *    Stock le ou les résultats de la requête SQL dans la TABLE   *
-      *    CUSTOMER.                                                   *
+      *    [RD] Effectue le FECTH pour le CURSOR de code_secu,         *
+      *    lastname, firstname et birth_date.                          *
       ******************************************************************
-       3000-START-HANDLE.
-           ADD 1 TO CUS-CNT.
+       2300-START-FETCH-CRSALL.
+           EXEC SQL  
+               OPEN CRSALL    
+           END-EXEC.
+           PERFORM UNTIL SQLCODE = 100
+               EXEC SQL
+                   FETCH CRSALL
+                   INTO :SQL-CUS-UUID, :SQL-CUS-GENDER,
+                        :SQL-CUS-LASTNAME, :SQL-CUS-FIRSTNAME,
+                        :SQL-CUS-ADRESS1, :SQL-CUS-ADRESS2, 
+                        :SQL-CUS-ZIPCODE, :SQL-CUS-TOWN,
+                        :SQL-CUS-COUNTRY, :SQL-CUS-PHONE,
+                        :SQL-CUS-MAIL, :SQL-CUS-BIRTH-DATE, 
+                        :SQL-CUS-DOCTOR, :SQL-CUS-CODE-SECU, 
+                        :SQL-CUS-CODE-IBAN, :SQL-CUS-NBCHILDREN, 
+                        :SQL-CUS-COUPLE, :SQL-CUS-CREATE-DATE, 
+                        :SQL-CUS-UPDATE-DATE, :SQL-CUS-CLOSE-DATE, 
+                        :SQL-CUS-ACTIVE
+               END-EXEC
+               
+               EVALUATE SQLCODE
+                   WHEN ZERO
+      *                PERFORM 3000-START-HANDLE THRU END-3000-HANDLE
+                   WHEN 100
+                       DISPLAY 'NO MORE ROWS IN CURSOR RESULT SET'
+                   WHEN OTHER
+                       DISPLAY 'ERROR FETCHING CURSOR CRSALL :'
+                       SPACE SQLCODE
+               END-EVALUATE
+           END-PERFORM.
 
-           MOVE SQL-CUS-LASTNAME  TO CUS-LASTNAME(CUS-CNT).
-           MOVE SQL-CUS-FIRSTNAME TO CUS-FIRSTNAME(CUS-CNT).
-           MOVE SQL-CUS-BIRTH-DATE TO CUS-BIRTH-DATE(CUS-CNT).
-           MOVE SQL-CUS-CODE-SECU TO CUS-CODE-SECU(CUS-CNT).
-       END-3000-HANDLE.
+           EXEC SQL  
+               CLOSE CRSALL    
+           END-EXEC.
+       END-2300-FETCH-CRSALL.
            EXIT.
