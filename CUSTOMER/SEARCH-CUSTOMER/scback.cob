@@ -1,5 +1,5 @@
       ******************************************************************
-      *    Le programme 'search logic' recherche dans la table         *
+      *    [RD] Le programme 'search logic' recherche dans la table    *
       *    'customer' un ou plusieurs adhérent en fonction des saisies *
       *    de l'utilisateur dans les différents champs de recherche.   *
       *    Les saisies de l'utilisateur correspondent à :              *
@@ -8,30 +8,36 @@
       *    - soit au code_secu, nom, prénom et date de naissance.      *
       ******************************************************************
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. sealogic.
-       AUTHOR.         Rémi.
+       PROGRAM-ID. scback.
+       AUTHOR.       Rémi.
 
       ******************************************************************
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
+       01  WS-CUSTOMER-ACCEPT.
+           03 WS-CUS-CODE-SECU  PIC 9(15).
+           03 WS-CUS-LASTNAME   PIC X(50).
+           03 WS-CUS-FIRSTNAME  PIC X(50).
+           03 WS-CUS-BIRTH-DATE PIC X(10).
+
        01  CUSTOMER-TABLE.
            03 CUS-CNT PIC 9(10).
            03 CUSTOMER OCCURS 1000 TIMES 
                        INDEXED BY CUS-IDX.
                05 CUS-UUID        PIC X(36).
                05 CUS-GENDER      PIC X(10).
-               05 CUS-LASTNAME	  PIC X(50).
+               05 CUS-LASTNAME    PIC X(50).
                05 CUS-FIRSTNAME   PIC X(50).
-               05 CUS-ADRESS1	  PIC X(50).
-               05 CUS-ADRESS2	  PIC X(50).
-               05 CUS-ZIPCODE	  PIC X(15).
+               05 CUS-ADRESS1     PIC X(50).
+               05 CUS-ADRESS2     PIC X(50).
+               05 CUS-ZIPCODE     PIC X(15).
                05 CUS-TOWN	      PIC X(50).
-               05 CUS-COUNTRY	  PIC X(20).
+               05 CUS-COUNTRY     PIC X(20).
                05 CUS-PHONE	      PIC X(10).
                05 CUS-MAIL	      PIC X(50).
                05 CUS-BIRTH-DATE  PIC X(10).
-               05 CUS-DOCTOR	  PIC X(50).
+               05 CUS-DOCTOR      PIC X(50).
                05 CUS-CODE-SECU   PIC 9(10).
                05 CUS-CODE-IBAN   PIC X(34).
                05 CUS-NBCHILDREN  PIC 9(03).
@@ -39,13 +45,7 @@
                05 CUS-CREATE-DATE PIC X(10).
                05 CUS-UPDATE-DATE PIC X(10).
                05 CUS-CLOSE-DATE  PIC X(10).
-               05 CUS-ACTIVE	  PIC X(01).
-
-       01  WS-CUSTOMER-ACCEPT.
-           03 WS-CUS-CODE-SECU  PIC 9(15).
-           03 WS-CUS-LASTNAME   PIC X(50).
-           03 WS-CUS-FIRSTNAME  PIC X(50).
-           03 WS-CUS-BIRTH-DATE PIC X(10).
+               05 CUS-ACTIVE      PIC X(01).
 
 OCESQL*EXEC SQL BEGIN DECLARE SECTION END-EXEC.
        01  DBNAME   PIC  X(11) VALUE 'boboniortdb'.
@@ -57,15 +57,15 @@ OCESQL*EXEC SQL BEGIN DECLARE SECTION END-EXEC.
            03 SQL-CUS-GENDER      PIC X(10).
            03 SQL-CUS-LASTNAME    PIC X(50).
            03 SQL-CUS-FIRSTNAME   PIC X(50).
-           03 SQL-CUS-ADRESS1	  PIC X(50).
-           03 SQL-CUS-ADRESS2	  PIC X(50).
-           03 SQL-CUS-ZIPCODE	  PIC X(15).
+           03 SQL-CUS-ADRESS1     PIC X(50).
+           03 SQL-CUS-ADRESS2     PIC X(50).
+           03 SQL-CUS-ZIPCODE     PIC X(15).
            03 SQL-CUS-TOWN	      PIC X(50).
-           03 SQL-CUS-COUNTRY	  PIC X(20).
+           03 SQL-CUS-COUNTRY     PIC X(20).
            03 SQL-CUS-PHONE	      PIC X(10).
            03 SQL-CUS-MAIL	      PIC X(50).
            03 SQL-CUS-BIRTH-DATE  PIC X(10).
-           03 SQL-CUS-DOCTOR	  PIC X(50).
+           03 SQL-CUS-DOCTOR      PIC X(50).
            03 SQL-CUS-CODE-SECU   PIC 9(15).
            03 SQL-CUS-CODE-IBAN   PIC X(34).
            03 SQL-CUS-NBCHILDREN  PIC 9(03).
@@ -73,7 +73,7 @@ OCESQL*EXEC SQL BEGIN DECLARE SECTION END-EXEC.
            03 SQL-CUS-CREATE-DATE PIC X(10).
            03 SQL-CUS-UPDATE-DATE PIC X(10).
            03 SQL-CUS-CLOSE-DATE  PIC X(10).
-           03 SQL-CUS-ACTIVE	  PIC X(01).
+           03 SQL-CUS-ACTIVE      PIC X(01).
 OCESQL*EXEC SQL END DECLARE SECTION END-EXEC.
 OCESQL*EXEC SQL INCLUDE SQLCA END-EXEC.  
 OCESQL     copy "sqlca.cbl".
@@ -190,7 +190,7 @@ OCESQL          BY REFERENCE WS-CUS-CODE-SECU
 OCESQL     END-CALL
 OCESQL     CALL "OCESQLCursorDeclareParams" USING
 OCESQL          BY REFERENCE SQLCA
-OCESQL          BY REFERENCE "sealogic_CRSCODESECU" & x"00"
+OCESQL          BY REFERENCE "scback_CRSCODESECU" & x"00"
 OCESQL          BY REFERENCE SQ0002
 OCESQL          BY VALUE 1
 OCESQL     END-CALL
@@ -231,7 +231,7 @@ OCESQL          BY REFERENCE WS-CUS-BIRTH-DATE
 OCESQL     END-CALL
 OCESQL     CALL "OCESQLCursorDeclareParams" USING
 OCESQL          BY REFERENCE SQLCA
-OCESQL          BY REFERENCE "sealogic_CRSNAMEDATE" & x"00"
+OCESQL          BY REFERENCE "scback_CRSNAMEDATE" & x"00"
 OCESQL          BY REFERENCE SQ0003
 OCESQL          BY VALUE 3
 OCESQL     END-CALL
@@ -285,7 +285,7 @@ OCESQL          BY REFERENCE WS-CUS-BIRTH-DATE
 OCESQL     END-CALL
 OCESQL     CALL "OCESQLCursorDeclareParams" USING
 OCESQL          BY REFERENCE SQLCA
-OCESQL          BY REFERENCE "sealogic_CRSALL" & x"00"
+OCESQL          BY REFERENCE "scback_CRSALL" & x"00"
 OCESQL          BY REFERENCE SQ0004
 OCESQL          BY VALUE 4
 OCESQL     END-CALL
@@ -324,7 +324,7 @@ OCESQL*        OPEN CRSCODESECU
 OCESQL*    END-EXEC.
 OCESQL     CALL "OCESQLCursorOpen" USING
 OCESQL          BY REFERENCE SQLCA
-OCESQL          BY REFERENCE "sealogic_CRSCODESECU" & x"00"
+OCESQL          BY REFERENCE "scback_CRSCODESECU" & x"00"
 OCESQL     END-CALL.
 
            PERFORM UNTIL SQLCODE = 100
@@ -332,7 +332,15 @@ OCESQL*        EXEC SQL
 OCESQL*            FETCH CRSCODESECU
 OCESQL*            INTO :SQL-CUS-UUID, :SQL-CUS-GENDER,
 OCESQL*                 :SQL-CUS-LASTNAME, :SQL-CUS-FIRSTNAME,
-OCESQL*                 :SQL-CUS-BIRTH-DATE, :SQL-CUS-CODE-SECU
+OCESQL*                 :SQL-CUS-ADRESS1, :SQL-CUS-ADRESS2, 
+OCESQL*                 :SQL-CUS-ZIPCODE, :SQL-CUS-TOWN,
+OCESQL*                 :SQL-CUS-COUNTRY, :SQL-CUS-PHONE,
+OCESQL*                 :SQL-CUS-MAIL, :SQL-CUS-BIRTH-DATE, 
+OCESQL*                 :SQL-CUS-DOCTOR, :SQL-CUS-CODE-SECU, 
+OCESQL*                 :SQL-CUS-CODE-IBAN, :SQL-CUS-NBCHILDREN, 
+OCESQL*                 :SQL-CUS-COUPLE, :SQL-CUS-CREATE-DATE, 
+OCESQL*                 :SQL-CUS-UPDATE-DATE, :SQL-CUS-CLOSE-DATE, 
+OCESQL*                 :SQL-CUS-ACTIVE
 OCESQL*        END-EXEC
 OCESQL     CALL "OCESQLStartSQL"
 OCESQL     END-CALL
@@ -362,9 +370,57 @@ OCESQL          BY REFERENCE SQL-CUS-FIRSTNAME
 OCESQL     END-CALL
 OCESQL     CALL "OCESQLSetResultParams" USING
 OCESQL          BY VALUE 16
+OCESQL          BY VALUE 50
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-ADRESS1
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 50
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-ADRESS2
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 15
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-ZIPCODE
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 50
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-TOWN
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 20
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-COUNTRY
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 10
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-PHONE
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 50
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-MAIL
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
 OCESQL          BY VALUE 10
 OCESQL          BY VALUE 0
 OCESQL          BY REFERENCE SQL-CUS-BIRTH-DATE
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 50
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-DOCTOR
 OCESQL     END-CALL
 OCESQL     CALL "OCESQLSetResultParams" USING
 OCESQL          BY VALUE 1
@@ -372,9 +428,51 @@ OCESQL          BY VALUE 15
 OCESQL          BY VALUE 0
 OCESQL          BY REFERENCE SQL-CUS-CODE-SECU
 OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 34
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-CODE-IBAN
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 1
+OCESQL          BY VALUE 3
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-NBCHILDREN
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 5
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-COUPLE
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 10
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-CREATE-DATE
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 10
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-UPDATE-DATE
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 10
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-CLOSE-DATE
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 1
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-ACTIVE
+OCESQL     END-CALL
 OCESQL     CALL "OCESQLCursorFetchOne" USING
 OCESQL          BY REFERENCE SQLCA
-OCESQL          BY REFERENCE "sealogic_CRSCODESECU" & x"00"
+OCESQL          BY REFERENCE "scback_CRSCODESECU" & x"00"
 OCESQL     END-CALL
 OCESQL     CALL "OCESQLEndSQL"
 OCESQL     END-CALL
@@ -395,7 +493,7 @@ OCESQL*        CLOSE CRSCODESECU
 OCESQL*    END-EXEC.
 OCESQL     CALL "OCESQLCursorClose"  USING
 OCESQL          BY REFERENCE SQLCA
-OCESQL          BY REFERENCE "sealogic_CRSCODESECU" & x"00"
+OCESQL          BY REFERENCE "scback_CRSCODESECU" & x"00"
 OCESQL     END-CALL
 OCESQL    .
        END-2100-FETCH-CRSCODESECU.
@@ -411,14 +509,22 @@ OCESQL*        OPEN CRSNAMEDATE
 OCESQL*    END-EXEC.
 OCESQL     CALL "OCESQLCursorOpen" USING
 OCESQL          BY REFERENCE SQLCA
-OCESQL          BY REFERENCE "sealogic_CRSNAMEDATE" & x"00"
+OCESQL          BY REFERENCE "scback_CRSNAMEDATE" & x"00"
 OCESQL     END-CALL.
            PERFORM UNTIL SQLCODE = 100
 OCESQL*        EXEC SQL
 OCESQL*            FETCH CRSNAMEDATE
 OCESQL*            INTO :SQL-CUS-UUID, :SQL-CUS-GENDER,
 OCESQL*                 :SQL-CUS-LASTNAME, :SQL-CUS-FIRSTNAME,
-OCESQL*                 :SQL-CUS-BIRTH-DATE, :SQL-CUS-CODE-SECU
+OCESQL*                 :SQL-CUS-ADRESS1, :SQL-CUS-ADRESS2, 
+OCESQL*                 :SQL-CUS-ZIPCODE, :SQL-CUS-TOWN,
+OCESQL*                 :SQL-CUS-COUNTRY, :SQL-CUS-PHONE,
+OCESQL*                 :SQL-CUS-MAIL, :SQL-CUS-BIRTH-DATE, 
+OCESQL*                 :SQL-CUS-DOCTOR, :SQL-CUS-CODE-SECU, 
+OCESQL*                 :SQL-CUS-CODE-IBAN, :SQL-CUS-NBCHILDREN, 
+OCESQL*                 :SQL-CUS-COUPLE, :SQL-CUS-CREATE-DATE, 
+OCESQL*                 :SQL-CUS-UPDATE-DATE, :SQL-CUS-CLOSE-DATE, 
+OCESQL*                 :SQL-CUS-ACTIVE
 OCESQL*        END-EXEC
 OCESQL     CALL "OCESQLStartSQL"
 OCESQL     END-CALL
@@ -448,9 +554,57 @@ OCESQL          BY REFERENCE SQL-CUS-FIRSTNAME
 OCESQL     END-CALL
 OCESQL     CALL "OCESQLSetResultParams" USING
 OCESQL          BY VALUE 16
+OCESQL          BY VALUE 50
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-ADRESS1
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 50
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-ADRESS2
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 15
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-ZIPCODE
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 50
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-TOWN
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 20
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-COUNTRY
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 10
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-PHONE
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 50
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-MAIL
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
 OCESQL          BY VALUE 10
 OCESQL          BY VALUE 0
 OCESQL          BY REFERENCE SQL-CUS-BIRTH-DATE
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 50
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-DOCTOR
 OCESQL     END-CALL
 OCESQL     CALL "OCESQLSetResultParams" USING
 OCESQL          BY VALUE 1
@@ -458,9 +612,51 @@ OCESQL          BY VALUE 15
 OCESQL          BY VALUE 0
 OCESQL          BY REFERENCE SQL-CUS-CODE-SECU
 OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 34
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-CODE-IBAN
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 1
+OCESQL          BY VALUE 3
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-NBCHILDREN
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 5
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-COUPLE
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 10
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-CREATE-DATE
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 10
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-UPDATE-DATE
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 10
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-CLOSE-DATE
+OCESQL     END-CALL
+OCESQL     CALL "OCESQLSetResultParams" USING
+OCESQL          BY VALUE 16
+OCESQL          BY VALUE 1
+OCESQL          BY VALUE 0
+OCESQL          BY REFERENCE SQL-CUS-ACTIVE
+OCESQL     END-CALL
 OCESQL     CALL "OCESQLCursorFetchOne" USING
 OCESQL          BY REFERENCE SQLCA
-OCESQL          BY REFERENCE "sealogic_CRSNAMEDATE" & x"00"
+OCESQL          BY REFERENCE "scback_CRSNAMEDATE" & x"00"
 OCESQL     END-CALL
 OCESQL     CALL "OCESQLEndSQL"
 OCESQL     END-CALL
@@ -481,7 +677,7 @@ OCESQL*        CLOSE CRSNAMEDATE
 OCESQL*    END-EXEC.
 OCESQL     CALL "OCESQLCursorClose"  USING
 OCESQL          BY REFERENCE SQLCA
-OCESQL          BY REFERENCE "sealogic_CRSNAMEDATE" & x"00"
+OCESQL          BY REFERENCE "scback_CRSNAMEDATE" & x"00"
 OCESQL     END-CALL
 OCESQL    .
        END-2200-FETCH-CRSNAMEDATE.
@@ -497,7 +693,7 @@ OCESQL*        OPEN CRSALL
 OCESQL*    END-EXEC.
 OCESQL     CALL "OCESQLCursorOpen" USING
 OCESQL          BY REFERENCE SQLCA
-OCESQL          BY REFERENCE "sealogic_CRSALL" & x"00"
+OCESQL          BY REFERENCE "scback_CRSALL" & x"00"
 OCESQL     END-CALL.
            PERFORM UNTIL SQLCODE = 100
 OCESQL*        EXEC SQL
@@ -644,7 +840,7 @@ OCESQL          BY REFERENCE SQL-CUS-ACTIVE
 OCESQL     END-CALL
 OCESQL     CALL "OCESQLCursorFetchOne" USING
 OCESQL          BY REFERENCE SQLCA
-OCESQL          BY REFERENCE "sealogic_CRSALL" & x"00"
+OCESQL          BY REFERENCE "scback_CRSALL" & x"00"
 OCESQL     END-CALL
 OCESQL     CALL "OCESQLEndSQL"
 OCESQL     END-CALL
@@ -665,15 +861,15 @@ OCESQL*        CLOSE CRSALL
 OCESQL*    END-EXEC.
 OCESQL     CALL "OCESQLCursorClose"  USING
 OCESQL          BY REFERENCE SQLCA
-OCESQL          BY REFERENCE "sealogic_CRSALL" & x"00"
+OCESQL          BY REFERENCE "scback_CRSALL" & x"00"
 OCESQL     END-CALL
 OCESQL    .
        END-2300-FETCH-CRSALL.
            EXIT.
 
       ******************************************************************
-      *    Stock le ou les résultats de la requête SQL dans la TABLE   *
-      *    CUSTOMER.                                                   *
+      *    [RD] Stock le ou les résultats de la requête SQL dans la    * 
+      *    TABLE customer.                                             *
       ******************************************************************
        3000-START-HANDLE.
            ADD 1 TO CUS-CNT.
