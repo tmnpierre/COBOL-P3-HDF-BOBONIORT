@@ -1,7 +1,10 @@
       ******************************************************************
+      *    [RD] Le programme est une SCREEN SECTION pour la création   *
+      *    d'un adhérent, affiche un formulaire de création.           *
       ******************************************************************
        IDENTIFICATION DIVISION.
        PROGRAM-ID. ccfront.
+       AUTHOR.        Rémi.
 
       ******************************************************************
 

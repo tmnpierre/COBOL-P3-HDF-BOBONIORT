@@ -204,7 +204,7 @@
            FOREGROUND-COLOR IS 0.   
 
       *    [RD] Bouton rechercher.
-           05 FILLER PIC X(23) VALUE 'CREATION DE l''ADHERENT' 
+           05 FILLER PIC X(23) VALUE "Creation de l'adherent" 
            LINE 34 COL 16 
            FOREGROUND-COLOR IS 2. 
            05 FILLER PIC X(01) TO WS-SEARCH-VALIDATION LINE 34 COL 39
@@ -219,7 +219,7 @@
            05 FILLER PIC X(01) TO WS-MENU-RETURN LINE 34 COL 170 
            BACKGROUND-COLOR IS 2
            FOREGROUND-COLOR IS 0. 
-           05 FILLER PIC X(14) VALUE 'RETOUR AU MENU' LINE 34 COL 172 
+           05 FILLER PIC X(14) VALUE 'Retour menu' LINE 34 COL 172 
            FOREGROUND-COLOR IS 2.
 
       ******************************************************************
